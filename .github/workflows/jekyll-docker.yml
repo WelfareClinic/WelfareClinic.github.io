@@ -1,0 +1,56 @@
+name: Jekyll site CI
+
+on:
+  push:
+    branches: [ "feat-set-up-CICD" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+  
+  
+# TODO: Currently, the build fails in macos-latest and windows-latest    
+#     strategy:
+#       matrix:
+#         platform: [ubuntu-latest, macos-latest, windows-latest]
+        
+#     runs-on: ${{  matrix.platform  }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the site in the jekyll/builder container
+      run: |
+        docker run \
+        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
+        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+    
+  test:
+    
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        
+    runs-on: ${{  matrix.platform  }}
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test through simple print
+      run: echo "Hello!"
+  
+  testing-next:
+    
+    needs: test
+    
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        
+    runs-on: ${{  matrix.platform  }}
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test through next print
+      run: echo "Hello again!"
+  
